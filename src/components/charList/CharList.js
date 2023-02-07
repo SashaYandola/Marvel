@@ -1,5 +1,5 @@
 import './charList.scss';
-import { Component } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import MarvelService from "../../services/MarvelService";
 import ErrorMessage from "../errorMessages/ErrorMessage";
 import Spinner from "../spinner/Spinner";
@@ -7,104 +7,79 @@ import Spinner from "../spinner/Spinner";
 import PropTypes from 'prop-types';
 import React from 'react';
 
-class CharList extends Component {
+const CharList = (props) => {
 
-    state = {
-        chars: [],
-        loading: true,
-        error: false,
-        listItemLoading: false,
-        offset: 300,
-        charEnded: false,
-    }
+    const [chars, setChars] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const [listItemLoading, setListItemLoading] = useState(false);
+    const [offset, setOffset] = useState(300);
+    const [charEnded, setCharEnded] = useState(false);
 
-    marvelService = new MarvelService();
+    const marvelService = new MarvelService();
 
-    componentDidMount() {
-        this.onRequest();
-    }
+    useEffect(() => {
+        onRequest();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-    onCharsLoaded = (newChars) => {
+    const onCharsLoaded = (newChars) => {
         let ended = false;
         if (newChars.length < 9) {
             ended = true;
         }
 
+        setChars(chars => [...chars, ...newChars]);
+        setLoading(false);
+        setListItemLoading(false);
+        setOffset(offset => offset + 9);
+        setCharEnded(ended);
+    }
 
-        this.setState(({ offset, chars }) => ({
-            chars: [...chars, ...newChars],
-            loading: false,
-            listItemLoading: false,
-            offset: offset + 9,
-            charEnded: ended,
-        }))
+    const onCharsLoading = () => {
+        setListItemLoading(true);
     }
-    onCharsLoading = () => {
-        this.setState({
-            listItemLoading: true,
-        })
-    }
-    onRequest = (offset) => {
-        this.onCharsLoading();
-        this.marvelService
+
+    const onRequest = (offset) => {
+        onCharsLoading();
+        marvelService
             .getAllCharacters(offset)
-            .then(this.onCharsLoaded)
-            .catch(this.onError);
-    }
-    onError = () => {
-        this.setState({
-            loading: false,
-            error: true,
-        })
+            .then(onCharsLoaded)
+            .catch(onError);
     }
 
-    itemRefs = [];
-
-    setRefs = (ref) =>{
-        this.itemRefs.push(ref);
-    }
-    focusItem = (id) => {
-        this.itemRefs.forEach(item => item.classList.remove('char__item_selected'));
-        this.itemRefs[id].classList.add('char__item_selected');
-        this.itemRefs[id].focus();
-    }
-    
-
-    render() {
-        const { chars, loading, error, offset, listItemLoading, charEnded } = this.state;
-
-        const items = this.ViewItems(chars);
-
-        const errorMessage = error ? <ErrorMessage /> : null;
-        const spinner = loading ? <Spinner /> : null;
-        const content = !(loading || error) ? items : null;
-
-        console.log(listItemLoading)
-        return (
-            <div className="char__list">
-                {errorMessage}
-                {spinner}
-                {content}
-
-                <button className="button button__main button__long"
-                    disabled={listItemLoading}
-                    onClick={() => this.onRequest(offset)}
-                    style={{'display': charEnded ? 'none' : 'block'}}>
-                    <div className="inner">load more</div>
-                </button>
-            </div>
-        )
+    const onError = () => {
+        setLoading(false);
+        setError(true);
     }
 
-    ViewItems = (chars) => {
+    const itemRefs = useRef([]);
+
+    const focusItem = (id) => {
+        itemRefs.current.forEach(item => item.classList.remove('char__item_selected'));
+        itemRefs.current[id].classList.add('char__item_selected');
+        itemRefs.current[id].focus();
+    }
+
+    const ViewItems = (chars) => {
         let items = chars.map((item, i) => {
             let imgStyle = item.thumbnail.indexOf('image_not_available') === 44 ? true : false;
 
             return (
-                <li ref={this.setRefs} key={item.id} className="char__item" onClick={() => {
-                    this.props.selectChar(item.id, this.ref);
-                    this.focusItem(i);
-                }}>
+                <li tabIndex={0}
+                    ref={el => itemRefs.current[i] = el}
+                    key={item.id} className="char__item"
+                    onClick={() => {
+                        props.selectChar(item.id);
+                        focusItem(i);
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === ' ' || e.key === "Enter") {
+                            props.selectChar(item.id);
+                            focusItem(i);
+                        }
+                    }}
+                >
                     <img src={item.thumbnail} alt="abyss" style={imgStyle ? { objectFit: 'unset' } : { objectFit: 'cover' }} />
                     <div className="char__name">{item.name}</div>
                 </li>
@@ -117,6 +92,26 @@ class CharList extends Component {
         );
     }
 
+    const items = ViewItems(chars);
+
+    const errorMessage = error ? <ErrorMessage /> : null;
+    const spinner = loading ? <Spinner /> : null;
+    const content = !(loading || error) ? items : null;
+
+    return (
+        <div className="char__list">
+            {errorMessage}
+            {spinner}
+            {content}
+
+            <button className="button button__main button__long"
+                disabled={listItemLoading}
+                onClick={() => onRequest(offset)}
+                style={{ 'display': charEnded ? 'none' : 'block' }}>
+                <div className="inner">load more</div>
+            </button>
+        </div>
+    )
 }
 
 CharList.propTypes = {
