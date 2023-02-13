@@ -1,7 +1,7 @@
 import "./randomChar.scss";
 import mjolnir from "../../resources/img/mjolnir.png";
 import { useEffect, useState } from "react";
-import MarvelService from "../../services/MarvelService";
+import useMarvelService from "../../services/MarvelService";
 import Spinner from "../spinner/Spinner";
 import ErrorMessage from "../errorMessages/ErrorMessage";
 
@@ -9,10 +9,8 @@ import ErrorMessage from "../errorMessages/ErrorMessage";
 const RandomChar = () => {
 
     const [char, setChar] = useState({});
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
 
-    const marvelServices = new MarvelService();
+    const { loading, error, getCharacter, clearError} = useMarvelService();
 
     useEffect(() => {
         updateCharacter();
@@ -22,30 +20,16 @@ const RandomChar = () => {
     const onCharLoaded = (char) => {
         // console.log('update')
         setChar(char);
-        setLoading(false);
-    }
-
-    const onCharLoading = () => {
-        setLoading(true);
-        setError(false);
-    }
-
-    const onError = () => {
-        setLoading(false);
-        setError(true);
     }
 
     const updateCharacter = () => {
+        clearError();
         const max = 1011400;
         const min = 1011000;
         const id = Math.floor(Math.random() * (max - min) + min);
 
-        onCharLoading()
-
-        marvelServices
-            .getCharacter(id)
+        getCharacter(id)
             .then(onCharLoaded)
-            .catch(onError);
     }
 
     // console.log('render')
@@ -77,13 +61,16 @@ const RandomChar = () => {
 }
 
 const View = ({ char }) => {
-    const { name, description, thumbnail, homepage, wiki } = char
+    const { name, description, thumbnail, homepage, wiki } = char;
 
-    const imageNotFound = thumbnail.indexOf('image_not_available') === 44 ? true : false;
+    let imgStyle = { 'objectFit': 'cover' };
+    if (thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
+        imgStyle = { 'objectFit': 'contain' };
+    }
 
     return (
         <div className="randomchar__block">
-            <img src={thumbnail} alt="Random character" className="randomchar__img" style={imageNotFound ? { objectFit: 'contain' } : { objectFit: 'cover' }} />
+            <img src={thumbnail} alt="Random character" className="randomchar__img" style={imgStyle} />
             <div className="randomchar__info">
                 <p className="randomchar__name">{name}</p>
                 <p className="randomchar__descr">
