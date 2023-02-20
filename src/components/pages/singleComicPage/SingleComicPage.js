@@ -1,5 +1,5 @@
 import './singleComicPage.scss';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import useMarvelService from '../../../services/MarvelService';
 import ErrorMessage from '../../errorMessages/ErrorMessage';
