@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 const NotFound = () => {
   const navigate = useNavigate();
 
-  function goBack() {
+  const goBack = () => {
     window.history.length > 1 ? navigate(-1) : navigate('/');
   }
 
