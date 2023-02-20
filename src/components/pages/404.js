@@ -5,7 +5,7 @@ const NotFound = () => {
   const navigate = useNavigate();
 
   function goBack() {
-    window.history.length > 1 ? navigate(-1) : navigate('/Marvel');
+    window.history.length > 1 ? navigate(-1) : navigate('/');
   }
 
   return (

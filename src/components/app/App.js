@@ -3,7 +3,6 @@ import AppHeader from "../appHeader/AppHeader";
 import { MainPage, ComicsPage, NotFound, SingleComicPage} from "../pages";
 
 const App = () => {
-    console.log(window.history.length)
     return (
         <Router>
             <div className="app">
