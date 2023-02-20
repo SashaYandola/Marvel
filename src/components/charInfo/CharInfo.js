@@ -7,6 +7,7 @@ import useMarvelService from '../../services/MarvelService';
 import ErrorMessage from '../errorMessages/ErrorMessage';
 import Spinner from '../spinner/Spinner';
 import Skeleton from '../skeleton/Skeleton';
+import { Link } from 'react-router-dom';
 
 
 const CharInfo = (props) => {
@@ -79,11 +80,12 @@ const View = ({ char }) => {
             <ul className="char__comics-list">
                 {
                     comics.length <= 0 ? 'COMICS NOT FOUND' : comics.map((item, i) => {
+                        const url = item.resourceURI.match(/\/(\d+)$/)[1];
                         // eslint-disable-next-line
                         if (i >= 10) return;
                         return (
                             <li className="char__comics-item" key={i}>
-                                {item.name}
+                                <Link to={`/comics/${url}`}>{item.name}</Link>
                             </li>
                         )
                     })

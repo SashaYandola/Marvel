@@ -5,8 +5,8 @@ const NotFound = () => {
   const navigate = useNavigate();
 
   const goBack = () => {
-    window.history.length > 1 ? navigate(-1) : navigate('/Marvel');
-  }
+    navigate ? navigate(-1) : navigate('/Marvel');
+  };
 
   return (
     <div>
@@ -15,7 +15,7 @@ const NotFound = () => {
       <Link
         to={'#'}
         onClick={goBack}
-        style={{ 'display': 'block', 'textAlign': 'center', 'fontWeight': 'bold', 'fontSize': '24px', 'color': '#9f0013', 'marginTop': '30px' }}>Back</Link>
+        style={{ 'display': 'block', 'fontWeight': 'bold', 'fontSize': '24px', 'color': '#9f0013', 'marginTop': '40px', 'textAlign': 'center' }}>Back</Link>
     </div>
   );
 };
